@@ -38,7 +38,6 @@ return {
         'bash-language-server',
         'marksman',
         'zls',
-        'ini-language-server',
       },
 
       -- if set to true this will check each tool for updates. If updates

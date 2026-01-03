@@ -49,6 +49,36 @@ local bearded_flavors = {
 }
 local current_bearded_flavor_index = 1
 
+-- State file for persistence
+local state_dir = vim.fn.stdpath('state')
+local state_file = state_dir .. '/colorscheme-state.json'
+
+-- Load state from file
+local function load_state()
+  local ok, data = pcall(vim.fn.readfile, state_file)
+  if not ok or #data == 0 then
+    return nil
+  end
+  local json_str = table.concat(data, '\n')
+  local ok2, state = pcall(vim.json.decode, json_str)
+  if not ok2 or not state then
+    return nil
+  end
+  return state
+end
+
+-- Save state to file
+local function save_state()
+  local state = {
+    current_index = current_index,
+    current_bearded_flavor_index = current_bearded_flavor_index,
+  }
+  local json_str = vim.json.encode(state)
+  -- Ensure state directory exists
+  vim.fn.mkdir(state_dir, 'p')
+  vim.fn.writefile({json_str}, state_file)
+end
+
 -- Helper function to apply theme with proper flavor handling
 local function apply_theme(theme_name)
   if theme_name == 'bearded' then
@@ -67,6 +97,21 @@ local function apply_theme(theme_name)
 end
 
 function M.setup()
+  -- Load saved state
+  local state = load_state()
+  if state then
+    current_index = state.current_index or current_index
+    current_bearded_flavor_index = state.current_bearded_flavor_index or current_bearded_flavor_index
+  end
+
+  -- Ensure indices are within valid ranges
+  if current_index < 1 or current_index > #themes then
+    current_index = 1
+  end
+  if current_bearded_flavor_index < 1 or current_bearded_flavor_index > #bearded_flavors then
+    current_bearded_flavor_index = 1
+  end
+
   -- Ensure themes are available
   -- This function can be called to initialize default theme
   apply_theme(themes[current_index])
@@ -75,18 +120,21 @@ end
 function M.toggle()
   current_index = current_index % #themes + 1
   apply_theme(themes[current_index])
+  save_state()
   vim.notify('Switched to ' .. themes[current_index], vim.log.levels.INFO)
 end
 
 function M.next()
   current_index = current_index % #themes + 1
   apply_theme(themes[current_index])
+  save_state()
   vim.notify('Switched to ' .. themes[current_index], vim.log.levels.INFO)
 end
 
 function M.prev()
   current_index = (current_index - 2) % #themes + 1
   apply_theme(themes[current_index])
+  save_state()
   vim.notify('Switched to ' .. themes[current_index], vim.log.levels.INFO)
 end
 
@@ -118,6 +166,7 @@ function M.set_bearded_flavor(flavor)
     apply_theme('bearded')
     vim.notify('Bearded flavor set to ' .. flavor, vim.log.levels.INFO)
   end
+  save_state()
 end
 
 -- Switch to next bearded flavor
