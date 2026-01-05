@@ -1,6 +1,24 @@
-require('config.settings')
-require('config.keymaps')
-require('config.autocmds')
+require('core')
+
 require('plugins')
-require('config.colorscheme')
-require('lsp')
+
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'VeryLazy',
+  callback = function()
+    -- Apply colorscheme after all plugins are loaded
+    vim.schedule(function()
+      require('config.colorscheme').setup()
+    end)
+    -- Load LSP configuration
+    require('lsp')
+  end,
+  once = true,
+})
+
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'VeryLazy',
+  callback = function()
+    require('lsp')
+  end,
+  once = true,
+})

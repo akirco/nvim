@@ -1,9 +1,6 @@
 local M = {}
 
-local themes = { 'arctic', 'gruvbox', 'bearded' }
-local current_index = 1
-
--- Bearded theme flavors (subset of available flavors)
+-- Bearded theme flavors
 local bearded_flavors = {
   -- Original favorites
   'arc',
@@ -44,9 +41,10 @@ local bearded_flavors = {
   'earth',
   'coffee',
   'coffee-reversed',
-  'themanopia',
+  'themianopia',
   'void',
 }
+
 local current_bearded_flavor_index = 1
 
 -- State file for persistence
@@ -70,7 +68,6 @@ end
 -- Save state to file
 local function save_state()
   local state = {
-    current_index = current_index,
     current_bearded_flavor_index = current_bearded_flavor_index,
   }
   local json_str = vim.json.encode(state)
@@ -80,19 +77,14 @@ local function save_state()
 end
 
 -- Helper function to apply theme with proper flavor handling
-local function apply_theme(theme_name)
-  if theme_name == 'bearded' then
-    local flavor = bearded_flavors[current_bearded_flavor_index]
-    -- Use bearded plugin's load function to apply the flavor
-    local ok, bearded = pcall(require, 'bearded')
-    if ok then
-      bearded.load(flavor)
-    else
-      -- Fallback to colorscheme command if plugin not available
-      vim.cmd('colorscheme bearded')
-    end
+local function apply_bearded_flavor(flavor)
+  -- Use bearded plugin's load function to apply flavor
+  local ok, bearded = pcall(require, 'bearded')
+  if ok then
+    bearded.load(flavor)
   else
-    vim.cmd('colorscheme ' .. theme_name)
+    -- Fallback to colorscheme command if plugin not available
+    vim.cmd('colorscheme bearded')
   end
 end
 
@@ -100,42 +92,17 @@ function M.setup()
   -- Load saved state
   local state = load_state()
   if state then
-    current_index = state.current_index or current_index
     current_bearded_flavor_index = state.current_bearded_flavor_index or current_bearded_flavor_index
   end
 
-  -- Ensure indices are within valid ranges
-  if current_index < 1 or current_index > #themes then
-    current_index = 1
-  end
+  -- Ensure index is within valid range
   if current_bearded_flavor_index < 1 or current_bearded_flavor_index > #bearded_flavors then
     current_bearded_flavor_index = 1
   end
 
-  -- Ensure themes are available
-  -- This function can be called to initialize default theme
-  apply_theme(themes[current_index])
-end
-
-function M.toggle()
-  current_index = current_index % #themes + 1
-  apply_theme(themes[current_index])
-  save_state()
-  vim.notify('Switched to ' .. themes[current_index], vim.log.levels.INFO)
-end
-
-function M.next()
-  current_index = current_index % #themes + 1
-  apply_theme(themes[current_index])
-  save_state()
-  vim.notify('Switched to ' .. themes[current_index], vim.log.levels.INFO)
-end
-
-function M.prev()
-  current_index = (current_index - 2) % #themes + 1
-  apply_theme(themes[current_index])
-  save_state()
-  vim.notify('Switched to ' .. themes[current_index], vim.log.levels.INFO)
+  -- Apply default theme
+  local flavor = bearded_flavors[current_bearded_flavor_index]
+  apply_bearded_flavor(flavor)
 end
 
 -- Helper function to check if table contains value
@@ -161,12 +128,16 @@ function M.set_bearded_flavor(flavor)
       break
     end
   end
-  -- Apply the flavor if current theme is bearded
-  if themes[current_index] == 'bearded' then
-    apply_theme('bearded')
-    vim.notify('Bearded flavor set to ' .. flavor, vim.log.levels.INFO)
-  end
+  apply_bearded_flavor(flavor)
   save_state()
+  vim.notify('Bearded flavor set to ' .. flavor, vim.log.levels.INFO)
+end
+
+-- Toggle bearded flavor (switch to next)
+function M.toggle()
+  current_bearded_flavor_index = current_bearded_flavor_index % #bearded_flavors + 1
+  local flavor = bearded_flavors[current_bearded_flavor_index]
+  M.set_bearded_flavor(flavor)
 end
 
 -- Switch to next bearded flavor
@@ -187,9 +158,5 @@ end
 function M.get_current_bearded_flavor()
   return bearded_flavors[current_bearded_flavor_index]
 end
-
-
--- Initialize default theme
-M.setup()
 
 return M

@@ -8,7 +8,7 @@ local plugins = {
     config = function()
       require('mason').setup()
       local mason_tool_installer = require('mason-tool-installer')
-      
+
       mason_tool_installer.setup({
         ensure_installed = {
           'shellcheck',
@@ -77,13 +77,13 @@ local plugins = {
     config = function()
       local mason_lspconfig = require('mason-lspconfig')
       local lspconfig = require('lspconfig')
-      
+
       local common_config = {
         capabilities = require('blink.cmp').get_lsp_capabilities()
       }
-      
+
       _G.common_lsp_config = common_config
-      
+
       vim.diagnostic.config({
         virtual_lines = false,
         underline = true,
@@ -102,7 +102,7 @@ local plugins = {
           },
         },
       })
-      
+
       vim.api.nvim_create_autocmd('LspAttach', {
         desc = 'LSP actions',
         callback = function(event)
@@ -114,7 +114,7 @@ local plugins = {
             vim.lsp.get_client_by_id(event.data.client_id).stop(true)
             return
           end
-          
+
           vim.keymap.set('n', 'K', '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
           vim.keymap.set('n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
           vim.keymap.set('n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
@@ -123,7 +123,7 @@ local plugins = {
           vim.keymap.set('n', 'gr', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
           vim.keymap.set('n', 'gs', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
           vim.keymap.set('n', '<F2>', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-          vim.keymap.set({ 'n', 'x' }, '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
+          vim.keymap.set('n', '<F3>', '<cmd>lua vim.lsp.buf.format({async = true})<cr>', opts)
           vim.keymap.set('n', '<F4>', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
         end,
       })
@@ -135,7 +135,7 @@ local plugins = {
     enabled = true,
     config = function()
       local conform = require('conform')
-      
+
       conform.setup({
         formatters_by_ft = {
           ['*'] = { 'trim_whitespace' },
@@ -226,14 +226,14 @@ local plugins = {
     event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local lint = require('lint')
-      
+
       lint.linters_by_ft = {
         python = { 'ruff' },
         sh = { 'shellcheck' },
         bash = { 'shellcheck' },
         makefile = { 'checkmake' },
       }
-      
+
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
       vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
         group = lint_augroup,
@@ -255,7 +255,7 @@ local plugins = {
     },
     config = function()
       local treesitter = require('nvim-treesitter.configs')
-      
+
       treesitter.setup({
         highlight = {
           enable = true,
@@ -301,10 +301,6 @@ local plugins = {
           extended_mode = false,
           max_file_lines = nil,
         },
-        context_commentstring = {
-          enable = true,
-          enable_autocmd = false,
-        },
       })
     end,
   },
@@ -321,8 +317,6 @@ local plugins = {
           keymap = {
             ['<Tab>'] = { 'show', 'accept' },
           },
-          completion = { menu = { auto_show = true } },
-          sources = { 'buffer', 'cmdline' , 'path'},
         },
         completion = {
           documentation = {
@@ -387,8 +381,8 @@ local plugins = {
         appearance = {
           nerd_font_variant = 'mono',
         },
-        signature = { enabled = true, window = { border = 'single' } ,
-        
+        signature = { enabled = true, window = { border = 'single' } },
+
         sources = {
           default = { 'lsp', 'path', 'snippets', 'buffer' },
           providers = {
@@ -420,11 +414,11 @@ local plugins = {
             download = true,
             ignore_version_mismatch = true,
           },
-      })
-    end,
-          prebuilt_binaries = {
-            download = true,
-            ignore_version_mismatch = true,
-          },
         },
       })
+
+    end,
+  },
+}
+
+return plugins

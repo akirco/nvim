@@ -47,7 +47,7 @@ o.winborder = 'rounded'
 
 
 -- Status line and command line settings
-o.cmdheight = 1  -- Height of the command line (default: 1)
+o.cmdheight = 0  -- Height of the command line (default: 1)
 o.laststatus = 2 -- Always show status line (0: never, 1: only with splits, 2: always)
 o.showmode = false -- Don't show mode in command line (already shown in lualine)
 
